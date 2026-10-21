@@ -1,0 +1,6 @@
+/target/
+/build/
+*.o
+*.obj
+*.pdb
+.DS_Store

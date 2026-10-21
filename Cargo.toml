@@ -1,0 +1,13 @@
+[package]
+name = "dinit"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-only"
+rust-version = "1.75"
+description = "Standalone typed event bus and native event service ABI for Helium"
+
+[lib]
+path = "src/lib.rs"
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

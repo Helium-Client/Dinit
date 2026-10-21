@@ -1,0 +1,20 @@
+name: Dinit CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+      - run: cargo test --all-targets
+      - name: Check public C header
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror -I include tests/header_smoke.c -o /tmp/dinit-header-smoke
+          /tmp/dinit-header-smoke
