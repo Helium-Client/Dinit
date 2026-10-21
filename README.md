@@ -28,9 +28,30 @@ let _subscription = bus.subscribe::<TickPost, _>(0, |event| {
 });
 ```
 
+The typed bus also defines `PlayerJoin`, `PlayerLeave`, `WorldChanged`, `ChatMessage`,
+`ScreenChanged`, `KeyPressed`, `ModuleEnabled`, and `ModuleDisabled` events. `ChatMessage`
+is cancellable. UI and render integrations should publish through `publish_main_thread`,
+which rejects calls from any thread other than the one that created the bus.
+
+Network hooks must enqueue owned packet data with `queue_network_packet` instead of
+dispatching plugin callbacks on the network thread. The queue is bounded (1,024 packets,
+2 MiB per packet); errors are returned if it is full or a packet is oversized. The client
+main thread delivers queued events with `drain_network_events(limit)`. This ensures packet
+listeners—including plugins that touch UI or rendering—run only on the main thread.
+Queueing returns an error if Dinit has been closed.
+
+`inspector_snapshot` exposes event counts, total/average/maximum dispatch time, cancellation
+and panic counts, active listener names and priorities, per-listener timings, recent event
+traces (last 256), and the pending packet count. Use `subscribe_named` to make listener
+identities meaningful in an Inspector UI. Dinit is a standalone event service, so the
+client's visual Inspector UI and game hooks must be supplied by its Helium integration.
+
 ### Native plugins
 
-C and C++ consumers include `<dinit/dinit.h>`. The header defines the events and the versioned service interface shared with the Helium SDK.
+C and C++ consumers include `<dinit/dinit.h>`. The version-1 ABI remains compatible and
+continues to expose the lifecycle, tick, and render events. The richer Minecraft events
+and Inspector data are currently available through the Rust API; the client integration
+must bridge them for native plugins and render the visual Inspector.
 
 ## Validation
 
